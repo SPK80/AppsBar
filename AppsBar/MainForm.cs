@@ -64,20 +64,23 @@ namespace AppsBar
 		}
 		private void FillBar()
 		{
-			var processes = Process.GetProcesses();
-			bar.BeginUpdate();
+
 			int selected = -1;
 			if (bar.SelectedNode != null && bar.SelectedNode.Tag != null)
 				selected = ((Process)bar.SelectedNode.Tag).Id;
+
 			var expandeds = bar.Nodes.
 			Cast<TreeNode>().
 			Where(t => t.IsExpanded).
 			Select(t => ((Process)t.Tag).Id).
 			ToArray();
 
+			bar.BeginUpdate();
 			bar.Nodes.Clear();
 			bar.BeforeSelect += OnBeforeSelect;
-			foreach (Process process in processes.Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero)))
+
+			var processes = Process.GetProcesses().Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero));
+			foreach (Process process in processes)
 			{
 				var n = bar.Nodes.Add(process.ProcessName);
 				n.Tag = process;
