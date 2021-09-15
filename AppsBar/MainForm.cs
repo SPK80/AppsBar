@@ -18,8 +18,13 @@ namespace AppsBar
 		{
 			InitializeComponent();
 			InitBar();
-			// FillApps();
-			timer = new System.Timers.Timer(500.0);
+			InitTimer();
+
+		}
+
+		private void InitTimer()
+		{
+			timer = new System.Timers.Timer(1000.0);
 			timer.Elapsed += OnTimedEvent;
 			timer.AutoReset = true;
 			timer.Enabled = true;
@@ -27,18 +32,13 @@ namespace AppsBar
 
 		private void OnTimedEvent(object sender, ElapsedEventArgs e)
 		{
-			Action action = () =>
+			Action action = () => { if (!this.IsDisposed) { FillBar(); } };
+
+			try
 			{
-				try
-				{
-					if (!this.IsDisposed) FillApps();
-				}
-				catch { }
-			};
-
-			if (InvokeRequired)
-				Invoke(action);
-
+				if (InvokeRequired) Invoke(action);
+			}
+			catch { }
 		}
 
 		private TreeView bar;
@@ -48,24 +48,45 @@ namespace AppsBar
 		{
 			bar = new TreeView();
 			bar.Dock = DockStyle.Fill;
-			// bar.Location = new Point(x, y);
-			// bar.Width = this.Width - 1;
-			// bar.Height = this.Height - b1.Height - 1;
 			Controls.Add(bar);
 		}
 
-		private void FillApps()
+		private void OnBeforeSelect(object sender, TreeViewCancelEventArgs e)
+		{
+			if (e.Node.Level > 0)
+			{
+				bar.BeginUpdate();
+				e.Cancel = true;
+				var p = e.Node.Parent;
+				bar.SelectedNode = p;
+				bar.EndUpdate();
+			}
+		}
+		private void FillBar()
 		{
 			var processes = Process.GetProcesses();
 			bar.BeginUpdate();
+			int selected = -1;
+			if (bar.SelectedNode != null && bar.SelectedNode.Tag != null)
+				selected = ((Process)bar.SelectedNode.Tag).Id;
+			var expandeds = bar.Nodes.
+			Cast<TreeNode>().
+			Where(t => t.IsExpanded).
+			Select(t => ((Process)t.Tag).Id).
+			ToArray();
+
 			bar.Nodes.Clear();
-			var pr = processes.Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero));
-			foreach (Process process in pr)
+			bar.BeforeSelect += OnBeforeSelect;
+			foreach (Process process in processes.Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero)))
 			{
 				var n = bar.Nodes.Add(process.ProcessName);
+				n.Tag = process;
 				n.Nodes.Add(process.Id.ToString());
 				n.Nodes.Add(process.MainWindowTitle == "" ? "(Пусто)" : process.MainWindowTitle);
-
+				if (expandeds.Contains(process.Id))
+					n.Expand();
+				if (selected >= 0 && process.Id == selected)
+					bar.SelectedNode = n;
 			}
 			bar.EndUpdate();
 		}
