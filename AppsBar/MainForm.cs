@@ -32,7 +32,7 @@ namespace AppsBar
 
 		private void OnTimedEvent(object sender, ElapsedEventArgs e)
 		{
-			Action action = () => { if (!this.IsDisposed) { FillBar(); } };
+			Action action = () => { if (!this.IsDisposed) { UpdateBar(); } };
 
 			try
 			{
@@ -53,18 +53,7 @@ namespace AppsBar
 			Controls.Add(bar);
 		}
 
-		// private void OnBeforeSelect(object sender, TreeViewCancelEventArgs e)
-		// {
-		// 	if (e.Node.Level > 0)
-		// 	{
-		// 		bar.BeginUpdate();
-		// 		e.Cancel = true;
-		// 		var p = e.Node.Parent;
-		// 		bar.SelectedNode = p;
-		// 		bar.EndUpdate();
-		// 	}
-		// }
-		private void FillBar()
+		private void UpdateBar()
 		{
 			var processes = Process.GetProcesses().Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero)).ToArray();
 			bar.Update(processes);
