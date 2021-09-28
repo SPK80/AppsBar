@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace AppsBar
 {
@@ -30,14 +32,21 @@ namespace AppsBar
 
 		public void Update(Process[] processes)
 		{
-			var sel = this.SelectedItems;
+
+			var selId = this.SelectedItems.
+			Cast<ListViewItem>().
+			Select(it => (it.Tag as AppData).Id).
+			ToArray();
+
 			this.BeginUpdate();
 			this.Items.Clear();
 			foreach (Process process in processes)
 			{
 				var it = new ListViewItem();
-				it.Tag = new AppData(process);
-				it.Text = (it.Tag as AppData).ToString();
+				AppData appData = (AppData)(it.Tag = new AppData(process));
+				it.Text = appData.ToString();
+				if (selId.Contains(appData.Id))
+					it.Selected = true;
 				this.Items.Add(it);
 
 			}
