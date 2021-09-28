@@ -24,7 +24,7 @@ namespace AppsBar
 
 		private void InitTimer()
 		{
-			timer = new System.Timers.Timer(1000.0);
+			timer = new System.Timers.Timer(500.0);
 			timer.Elapsed += OnTimedEvent;
 			timer.AutoReset = true;
 			timer.Enabled = true;
@@ -41,57 +41,34 @@ namespace AppsBar
 			catch { }
 		}
 
-		private TreeView bar;
+
+		private AppsView bar;
+
 		private System.Timers.Timer timer;
 
 		private void InitBar()
 		{
-			bar = new TreeView();
+			bar = new AppsView();
 			bar.Dock = DockStyle.Fill;
 			Controls.Add(bar);
 		}
 
-		private void OnBeforeSelect(object sender, TreeViewCancelEventArgs e)
-		{
-			if (e.Node.Level > 0)
-			{
-				bar.BeginUpdate();
-				e.Cancel = true;
-				var p = e.Node.Parent;
-				bar.SelectedNode = p;
-				bar.EndUpdate();
-			}
-		}
+		// private void OnBeforeSelect(object sender, TreeViewCancelEventArgs e)
+		// {
+		// 	if (e.Node.Level > 0)
+		// 	{
+		// 		bar.BeginUpdate();
+		// 		e.Cancel = true;
+		// 		var p = e.Node.Parent;
+		// 		bar.SelectedNode = p;
+		// 		bar.EndUpdate();
+		// 	}
+		// }
 		private void FillBar()
 		{
+			var processes = Process.GetProcesses().Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero)).ToArray();
+			bar.Update(processes);
 
-			int selected = -1;
-			if (bar.SelectedNode != null && bar.SelectedNode.Tag != null)
-				selected = ((Process)bar.SelectedNode.Tag).Id;
-
-			var expandeds = bar.Nodes.
-			Cast<TreeNode>().
-			Where(t => t.IsExpanded).
-			Select(t => ((Process)t.Tag).Id).
-			ToArray();
-
-			bar.BeginUpdate();
-			bar.Nodes.Clear();
-			bar.BeforeSelect += OnBeforeSelect;
-
-			var processes = Process.GetProcesses().Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero));
-			foreach (Process process in processes)
-			{
-				var n = bar.Nodes.Add(process.ProcessName);
-				n.Tag = process;
-				n.Nodes.Add(process.Id.ToString());
-				n.Nodes.Add(process.MainWindowTitle == "" ? "(Пусто)" : process.MainWindowTitle);
-				if (expandeds.Contains(process.Id))
-					n.Expand();
-				if (selected >= 0 && process.Id == selected)
-					bar.SelectedNode = n;
-			}
-			bar.EndUpdate();
 		}
 	}
 }
