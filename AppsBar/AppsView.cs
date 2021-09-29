@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Linq;
 using System;
+using System.ComponentModel;
 
 namespace AppsBar
 {
@@ -13,20 +14,25 @@ namespace AppsBar
 		private delegate void PropertyChangedAction(AppData sender, string propertyName);
 		private class AppData
 		{
-			public AppData(Process process, PropertyChangedAction onChanged)
+			public AppData(Process process)
 			{
 				this.Id = process.Id;
 				this.mainWindowTitle = process.MainWindowTitle;
-				this.onChanged = onChanged;
 			}
-			private PropertyChangedAction onChanged;
+
+
+			public event PropertyChangedEventHandler Changed;
 
 			public int Id { get; }
 			private string mainWindowTitle;
 			public string MainWindowTitle
 			{
 				get => mainWindowTitle;
-				set { mainWindowTitle = value; onChanged(this, "MainWindowTitle"); }
+				set
+				{
+					mainWindowTitle = value;
+					Changed?.Invoke(this, new PropertyChangedEventArgs("MainWindowTitle"));
+				}
 			}
 
 			public override string ToString()
@@ -65,22 +71,21 @@ namespace AppsBar
 				}
 				catch (InvalidOperationException)
 				{
-					var newAppData = new AppData(process,
-					(sender, prop) =>
-					{
-						//if MainWindowTitle changed, update ListViewItem Text (contains changed AppData)
-						try
-						{
-							var chItem = Items.Cast<ListViewItem>().First(item => itemAppData(item) == sender);
-							if (prop == "MainWindowTitle") chItem.Text = sender.MainWindowTitle;
-						}
-						catch (InvalidOperationException)
-						{
-						}
-					});
+					var newAppData = new AppData(process);
 
 					var newItem = new ListViewItem(newAppData.ToString());
 					newItem.Tag = newAppData;
+					newAppData.Changed += (sender, e) =>
+						{
+							//if MainWindowTitle changed, update ListViewItem Text (contains changed AppData)
+
+							if (sender == null) throw new ArgumentNullException();
+							if (!(sender is AppData)) throw new ArgumentException("sender mast be AppData");
+							var appData = sender as AppData;
+							if (e.PropertyName == "MainWindowTitle") newItem.Text = appData.MainWindowTitle;
+
+						};
+
 					this.Items.Add(newItem);
 				}
 			}
