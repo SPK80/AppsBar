@@ -9,17 +9,25 @@ namespace AppsBar
 
 	public class AppsView : ListView
 	{
+
+		private delegate void PropertyChangedAction(AppData sender, string propertyName);
 		private class AppData
 		{
-
-			public AppData(Process process)
+			public AppData(Process process, PropertyChangedAction onChanged)
 			{
 				this.Id = process.Id;
-				this.MainWindowTitle = process.MainWindowTitle;
+				this.mainWindowTitle = process.MainWindowTitle;
+				this.onChanged = onChanged;
 			}
+			private PropertyChangedAction onChanged;
 
 			public int Id { get; }
-			public string MainWindowTitle { get; }
+			private string mainWindowTitle;
+			public string MainWindowTitle
+			{
+				get => mainWindowTitle;
+				set { mainWindowTitle = value; onChanged(this, "MainWindowTitle"); }
+			}
 
 			public override string ToString()
 			{
@@ -51,12 +59,26 @@ namespace AppsBar
 			{
 				try
 				{
-					//var sameAppData = 
-					this.appsData.First(ad => ad.Id == process.Id);
+					var sameAppData = this.appsData.First(ad => ad.Id == process.Id);
+					if (sameAppData.MainWindowTitle != process.MainWindowTitle)
+						sameAppData.MainWindowTitle = process.MainWindowTitle;
 				}
 				catch (InvalidOperationException)
 				{
-					var newAppData = new AppData(process);
+					var newAppData = new AppData(process,
+					(sender, prop) =>
+					{
+						//if MainWindowTitle changed, update ListViewItem Text (contains changed AppData)
+						try
+						{
+							var chItem = Items.Cast<ListViewItem>().First(item => itemAppData(item) == sender);
+							if (prop == "MainWindowTitle") chItem.Text = sender.MainWindowTitle;
+						}
+						catch (InvalidOperationException)
+						{
+						}
+					});
+
 					var newItem = new ListViewItem(newAppData.ToString());
 					newItem.Tag = newAppData;
 					this.Items.Add(newItem);
