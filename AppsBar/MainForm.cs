@@ -42,21 +42,21 @@ namespace AppsBar
 		}
 
 
-		private AppsView bar;
+		private AppsView appsView;
 
 		private System.Timers.Timer timer;
 
 		private void InitBar()
 		{
-			bar = new AppsView();
-			bar.Dock = DockStyle.Fill;
-			Controls.Add(bar);
+			appsView = new AppsView();
+			appsView.Dock = DockStyle.Fill;
+			Controls.Add(appsView);
 		}
 
 		private void UpdateBar()
 		{
 			var processes = Process.GetProcesses().Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero)).ToArray();
-			bar.Update(processes);
+			appsView.Update(processes);
 
 		}
 	}
