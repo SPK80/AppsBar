@@ -42,6 +42,7 @@ namespace AppsBar
 
 			return processes;
 		}
+
 		public MainForm()
 		{
 			InitializeComponent();
@@ -50,12 +51,10 @@ namespace AppsBar
 			updateButton.Text = "Update";
 
 
-			Controls.Add(updateButton);
-
 			var appsView = new AppsView();
 			appsView.Dock = DockStyle.Fill;
 			Controls.Add(appsView);
-
+			Controls.Add(updateButton);
 
 			var appsWatcher = InitAppsWatcher(appsView);
 
