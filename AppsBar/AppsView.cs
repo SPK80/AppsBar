@@ -58,6 +58,24 @@ namespace AppsBar
 			return item.Tag as AppData;
 		}
 
+		public void Add(Process process)
+		{
+			var newAppData = new AppData(process);
+			var newItem = new ListViewItem(newAppData.ToString());
+			newItem.Tag = newAppData;
+			newAppData.Changed += (sender, e) =>
+				{
+					//if MainWindowTitle changed, update ListViewItem Text (contains changed AppData)
+
+					if (sender == null) throw new ArgumentNullException();
+					if (!(sender is AppData)) throw new ArgumentException("sender mast be AppData");
+					var appData = sender as AppData;
+					if (e.PropertyName == "MainWindowTitle") newItem.Text = appData.MainWindowTitle;
+
+				};
+			Items.Add(newItem);
+		}
+
 		public void Update(Process[] processes)
 		{
 			//add App if found new process

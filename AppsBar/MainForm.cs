@@ -17,47 +17,36 @@ namespace AppsBar
 		public MainForm()
 		{
 			InitializeComponent();
-			InitBar();
-			InitTimer();
-
-		}
-
-		private void InitTimer()
-		{
-			timer = new System.Timers.Timer(500.0);
-			timer.Elapsed += OnTimedEvent;
-			timer.AutoReset = true;
-			timer.Enabled = true;
-		}
-
-		private void OnTimedEvent(object sender, ElapsedEventArgs e)
-		{
-			Action action = () => { if (!this.IsDisposed) { UpdateBar(); } };
-
-			try
-			{
-				if (InvokeRequired) Invoke(action);
-			}
-			catch { }
-		}
+			var updateButton = new Button();
+			updateButton.Dock = DockStyle.Top;
+			updateButton.Text = "Update";
 
 
-		private AppsView appsView;
+			Controls.Add(updateButton);
 
-		private System.Timers.Timer timer;
-
-		private void InitBar()
-		{
-			appsView = new AppsView();
+			var appsView = new AppsView();
 			appsView.Dock = DockStyle.Fill;
 			Controls.Add(appsView);
+
+			var processes = new Processes.AppsWatcher();
+			processes.NewProsess += (s, e) =>
+			{
+				var p = e.Process;
+				appsView.Add(p);
+			};
+
+			updateButton.Click += (s, e) =>
+			{
+				processes.Update();
+			};
+
+			// processes.KilledProsess += (s, e) =>
+			// {
+			// 	var p = e.Process;
+			// 	appsView.Kill(p);
+			// };
+
 		}
 
-		private void UpdateBar()
-		{
-			var processes = Process.GetProcesses().Where(p => !p.MainWindowHandle.Equals(IntPtr.Zero)).ToArray();
-			appsView.Update(processes);
-
-		}
 	}
 }
