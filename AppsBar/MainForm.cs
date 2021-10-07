@@ -24,6 +24,24 @@ namespace AppsBar
 			return timer;
 		}
 
+		private Processes.AppsWatcher InitAppsWatcher(AppsView view)
+		{
+			var processes = new Processes.AppsWatcher();
+
+			processes.NewProsess += (s, e) =>
+			{
+				var p = e.Process;
+				view.Add(p);
+			};
+
+			processes.KilledProsess += (s, e) =>
+			{
+				var p = e.Process;
+				view.Remove(p);
+			};
+
+			return processes;
+		}
 		public MainForm()
 		{
 			InitializeComponent();
@@ -38,18 +56,14 @@ namespace AppsBar
 			appsView.Dock = DockStyle.Fill;
 			Controls.Add(appsView);
 
-			var processes = new Processes.AppsWatcher();
-			processes.NewProsess += (s, e) =>
-			{
-				var p = e.Process;
-				appsView.Add(p);
-			};
+
+			var appsWatcher = InitAppsWatcher(appsView);
 
 			InitTimer((s, e) =>
 			{
 				Action action = () =>
 				{
-					if (!this.IsDisposed) processes.Update();
+					if (!this.IsDisposed) appsWatcher.Update();
 				};
 
 				try
@@ -61,13 +75,7 @@ namespace AppsBar
 
 			updateButton.Click += (s, e) =>
 			{
-				processes.Update();
-			};
-
-			processes.KilledProsess += (s, e) =>
-			{
-				var p = e.Process;
-				appsView.Remove(p);
+				appsWatcher.Update();
 			};
 
 		}
