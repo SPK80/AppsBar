@@ -6,14 +6,24 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+
 
 namespace AppsBar
 {
 	public partial class MainForm : Form
 	{
+		private System.Timers.Timer timer;
+		private System.Timers.Timer InitTimer(ElapsedEventHandler OnTimedEvent, double period = 500.0)
+		{
+			timer = new System.Timers.Timer(period);
+			timer.Elapsed += OnTimedEvent;
+			timer.AutoReset = true;
+			timer.Enabled = true;
+			return timer;
+		}
+
 		public MainForm()
 		{
 			InitializeComponent();
@@ -35,6 +45,19 @@ namespace AppsBar
 				appsView.Add(p);
 			};
 
+			InitTimer((s, e) =>
+			{
+				Action action = () =>
+				{
+					if (!this.IsDisposed) processes.Update();
+				};
+
+				try
+				{
+					if (InvokeRequired) Invoke(action);
+				}
+				catch { }
+			});
 
 			updateButton.Click += (s, e) =>
 			{
