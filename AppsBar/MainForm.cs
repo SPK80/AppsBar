@@ -35,16 +35,17 @@ namespace AppsBar
 				appsView.Add(p);
 			};
 
+
 			updateButton.Click += (s, e) =>
 			{
 				processes.Update();
 			};
 
-			// processes.KilledProsess += (s, e) =>
-			// {
-			// 	var p = e.Process;
-			// 	appsView.Kill(p);
-			// };
+			processes.KilledProsess += (s, e) =>
+			{
+				var p = e.Process;
+				appsView.Remove(p);
+			};
 
 		}
 

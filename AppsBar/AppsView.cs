@@ -76,6 +76,12 @@ namespace AppsBar
 			Items.Add(newItem);
 		}
 
+		public void Remove(Process process)
+		{
+			var item = Items.Cast<ListViewItem>().FirstOrDefault(it => (it.Tag as AppData).Id == process.Id);
+			Items.Remove(item);
+		}
+
 		public void Update(Process[] processes)
 		{
 			//add App if found new process
