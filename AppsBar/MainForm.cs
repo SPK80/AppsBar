@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Timers;
 using System.Windows.Forms;
-
+using AppsBar.Processes;
 
 namespace AppsBar
 {
@@ -24,23 +24,21 @@ namespace AppsBar
 			return timer;
 		}
 
-		private Processes.AppsWatcher InitAppsWatcher(AppsView view)
+		private AppsWatcher InitAppsWatcher(AppsView view)
 		{
-			var processes = new Processes.AppsWatcher();
+			var appsWatcher = new AppsWatcher();
 
-			processes.NewProsess += (s, e) =>
+			appsWatcher.NewProsess += (s, e) =>
 			{
-				var p = e.Process;
-				view.Add(p);
+				view.Add(e.Process);
 			};
 
-			processes.KilledProsess += (s, e) =>
+			appsWatcher.KilledProsess += (s, e) =>
 			{
-				var p = e.Process;
-				view.Remove(p);
+				view.Remove(e.Process);
 			};
 
-			return processes;
+			return appsWatcher;
 		}
 
 		public MainForm()
@@ -50,9 +48,9 @@ namespace AppsBar
 			updateButton.Dock = DockStyle.Top;
 			updateButton.Text = "Update";
 
-
 			var appsView = new AppsView();
 			appsView.Dock = DockStyle.Fill;
+			
 			Controls.Add(appsView);
 			Controls.Add(updateButton);
 
