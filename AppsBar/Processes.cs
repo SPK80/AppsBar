@@ -10,6 +10,8 @@ namespace AppsBar.Processes
 		public event ProsessEventHandler NewProsess;
 		public event ProsessEventHandler KilledProsess;
 
+		public event ProsessEventHandler UpdateProsess;
+
 		private List<Process> processes = new List<Process>();
 
 		public void Update()
@@ -32,6 +34,8 @@ namespace AppsBar.Processes
 				processes.Remove(p);
 				KilledProsess?.Invoke(this, new ProsessEventArgs(p));
 			});
+
+			winProcesses.ToList().ForEach(p => UpdateProsess?.Invoke(this, new ProsessEventArgs(p)));
 
 		}
 	}

@@ -30,12 +30,17 @@ namespace AppsBar
 
 			appsWatcher.NewProsess += (s, e) =>
 			{
-				view.Add(e.Process);
+				view.Add(e.Process.Id, e.Process.MainWindowTitle);
 			};
 
 			appsWatcher.KilledProsess += (s, e) =>
 			{
-				view.Remove(e.Process);
+				view.Remove(e.Process.Id);
+			};
+
+			appsWatcher.UpdateProsess += (s, e) =>
+			{
+				view.Update(e.Process.Id, e.Process.MainWindowTitle);
 			};
 
 			return appsWatcher;
@@ -50,7 +55,7 @@ namespace AppsBar
 
 			var appsView = new AppsView();
 			appsView.Dock = DockStyle.Fill;
-			
+
 			Controls.Add(appsView);
 			Controls.Add(updateButton);
 
