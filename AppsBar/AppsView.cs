@@ -4,10 +4,11 @@ using System.Windows.Forms;
 using System.Linq;
 using System;
 using System.ComponentModel;
+using System.Runtime.Serialization;
+using System.Drawing;
 
 namespace AppsBar
 {
-
 	public class AppsView : ListView, IAppsView
 	{
 		public AppsView()
@@ -15,9 +16,9 @@ namespace AppsBar
 			this.View = View.List;
 		}
 
-		public void Add(int pid, string MainWindowTitle)
+		public void Add(int pid)
 		{
-			var newItem = new ListViewItem(MainWindowTitle);
+			var newItem = new ListViewItem();
 			newItem.Tag = pid;
 			Items.Add(newItem);
 		}
@@ -41,7 +42,7 @@ namespace AppsBar
 
 	public interface IAppsView
 	{
-		void Add(int pid, string MainWindowTitle);
+		void Add(int pid);
 		void Remove(int pid);
 		void Update(int pid, string MainWindowTitle);
 	}

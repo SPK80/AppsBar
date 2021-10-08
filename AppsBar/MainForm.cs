@@ -30,7 +30,7 @@ namespace AppsBar
 
 			appsWatcher.NewProsess += (s, e) =>
 			{
-				view.Add(e.Process.Id, e.Process.MainWindowTitle);
+				view.Add(e.Process.Id);
 			};
 
 			appsWatcher.KilledProsess += (s, e) =>
@@ -40,7 +40,7 @@ namespace AppsBar
 
 			appsWatcher.UpdateProsess += (s, e) =>
 			{
-				view.Update(e.Process.Id, e.Process.MainWindowTitle);
+				view.Update(e.Process.Id, e.Process.MainWindowTitle == "" ? "[...]" : e.Process.MainWindowTitle);
 			};
 
 			return appsWatcher;
